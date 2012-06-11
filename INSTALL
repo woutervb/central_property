@@ -1,0 +1,23 @@
+This project is developed using the following environment
+
+Editor:
+ Eclipse + Pydev + Git
+
+OS:
+ Windows 7         (pyton 2.7.3 / setuptools 0.6c11 / pysqlite 2.6.3)
+ Ubuntu 12.04 lts  (python, setuptools, sqlite, pip are platform defaults)
+ 
+Database:
+ sqlite
+ 
+Framework:
+ django
+ django-extensions
+ django-treebeard
+ 
+Installation of framework and extensions:
+ pip install Django
+ pip install django-extensions
+ pip install django-treebeard
+ 
+(pip can be installed using the python setuptools with the command easy_setup install pip)

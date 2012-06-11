@@ -1,14 +1,16 @@
 from django.db import models
 from django_extensions.db.fields import ModificationDateTimeField, CreationDateTimeField
+from treebeard.mp_tree import MP_Node
 
 # Create your models here.
-class Parent(models.Model):
-    """
-    The Parent class identifies the parent, if any an object belongs to.
-    If parent_id attribute is not set or Null it there is no successor
-    """
-    parent_id = models.ForeignKey('self')
-    description = models.CharField(max_length=255)
+class Parent(MP_Node):
+    name = models.CharField(max_length=255)
+    
+    node_order_by = ['name']
+    def __unicode__(self):
+        return 'Name: %s' % self.name
+    
+    # These lines below are basic modification fields for an audit trail
     created = CreationDateTimeField()
     modified = ModificationDateTimeField()
 
