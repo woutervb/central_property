@@ -1,4 +1,5 @@
 # Django settings for central_property project.
+import os
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -9,10 +10,12 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+home = os.getenv('USERPROFILE') or os.getenv('HOME')
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/sqlite.db',                      # Or path to database file if using sqlite3.
+        'NAME': home + '/sqlite.db',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.

@@ -1,4 +1,6 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
+from models import Parent, KeyValue
+from treebeard.mp_tree import MP_NodeQuerySet
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,4 +16,24 @@ def store(request, object_ref):
     the key-value pair of that item.
     """
     logger.debug("Store views.store with arguments '%s'" % object_ref)
-    return HttpResponse("You called met with argument '%s'" % object_ref)
+    
+    # We know that the uri is / divided. The last one is either an
+    # Group identifier or an Key
+    items = object_ref.split('/')
+    
+    #check if the last item is a key or an object
+    try:
+        obj = Parent.objects.get(name = items[-1])
+    except Parent.DoesNotExist:
+        # If parent does not have the name of the item a key might exist
+        try:
+            obj = KeyValue.objects.filter(key__exact = items[-1])
+        except KeyValue.DoesNotExist:
+            # Neither a Group or Key does exist with the name
+            raise Http404
+    
+    str = u''
+    for objs in obj:
+        str = str + obj.key + ' => ' + obj.value + ','
+            
+    return HttpResponse("You called met with argument '%s'" % str)
