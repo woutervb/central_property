@@ -65,14 +65,20 @@ def yaml_dump(data):
     for k, v in data.iteritems():
         data2[k.encode('ascii', 'ignore')] = v.encode('ascii', 'ignore')
         
-    return yaml.dump(data2, explicit_start=True, explicit_end=True, 
-                     default_flow_style=False, allow_unicode=False, indent=4 * ' ')
+    return HttpResponse(yaml.dump(data2, 
+                                  explicit_start=True, 
+                                  explicit_end=True, 
+                                  default_flow_style=False, 
+                                  allow_unicode=False, 
+                                  indent=4 * ' '),
+                        content_type='text/yaml')
 
 def json_dump(data):
     """
     This function is a simple wrapper, so that we have some nice json output
     """
-    return json.dumps(data, sort_keys=True, indent=4 * ' ')
+    return HttpResponse(json.dumps(data, sort_keys=True, indent=4 * ' '),
+                        content_type='text/json')
 
 def xml_dump(data):
     stream = StringIO()
@@ -80,11 +86,11 @@ def xml_dump(data):
     xml.start("datafields")
     for k, v in data.iteritems():
         xml.element("dataelement", name=k, value=v)
-    xml.close("datafields")
+    xml.end("datafields")
     
     return_string = stream.getvalue()
     stream.close()
-    return return_string
+    return HttpResponse(return_string, content_type='text/xml')
 
 def make_response(request, data):
     """
@@ -108,4 +114,4 @@ def make_response(request, data):
     else:
         raise Http404
 
-    return HttpResponse(output)
+    return output
