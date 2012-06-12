@@ -1,25 +1,34 @@
 from django.http import HttpResponse, Http404, HttpResponseServerError
 from models import Parent, KeyValue, get_keys_from_parent, get_keys_from_kv, parent_tree_valid
-import logging
 import simplejson as json
 import yaml
 import re
 from elementtree.SimpleXMLWriter import XMLWriter
 from StringIO import StringIO
 
-logger = logging.getLogger(__name__)
 
 def index(request):
     return HttpResponse("Hello, world. You're at the store.")
 
 def store(request, object_ref):
     """
+    This function will check the incoming request.
+    If it is an get, we will continue with looking in the database to retrieve the data
+    If it is an post, we will update the database.
+    """
+    
+    if request.method == 'GET':
+        return store_get(request, object_ref)
+    else:
+        return HttpResponseServerError("Only GET and POST requests are supported")
+
+def store_get(request, object_ref):
+    """
     This function will check the request that came in.
     If the object_ref matches only one of the 'parent' elements, then we will throw the data of
     all key-value pairs at that level. If a specific key is requested we will only return
     the key-value pair of that item.
     """
-    logger.debug("Store views.store with arguments '%s'" % object_ref)
     
     # We know that the uri is / divided. The last one is either an
     # Group identifier or an Key
