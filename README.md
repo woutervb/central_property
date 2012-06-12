@@ -20,12 +20,12 @@ If we have an hierarchical store like the example below:
       child2
         key2 - value2
         
-A get call to http://<_hostname_>/root will retrieve **key0 - value0**
-A get call to http://<_hostname_>/root/child1 will retrieve **key0 - value0** and **key1 - value1**
-A get call to http://<_hostname_>/root/child2 will retrieve **key0 - value0** and **key2 - value2**
-A get call to http://<_hostname_>/root/child2/key2 will retrieve **key2 - value2**
-A get call to http://<_hostname_>/root/key2 will retrieve nothing
-A get call to http://<_hostname_>/root/key0 will retrieve **key0 - value0**
+* A get call to http://<_hostname_>/root will retrieve **key0 - value0**
+* A get call to http://<_hostname_>/root/child1 will retrieve **key0 - value0** and **key1 - value1**
+* A get call to http://<_hostname_>/root/child2 will retrieve **key0 - value0** and **key2 - value2**
+* A get call to http://<_hostname_>/root/child2/key2 will retrieve **key2 - value2**
+* A get call to http://<_hostname_>/root/key2 will retrieve nothing
+* A get call to http://<_hostname_>/root/key0 will retrieve **key0 - value0**
 
 Remember that key0, key1 and key2 in the above example don't have to be unique!
 
