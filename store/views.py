@@ -54,8 +54,24 @@ def store_post(request, object_ref):
     # Group identifier or an Key
         
     items = object_ref.split('/')
-    # TODO: build parent tree if needed
+    # TODO: build parent properly
     
+    # BUG: names now have to be unique in order to work, else tree mixup will happen
+    
+    pos = 0
+    previous = None
+    while pos < len(items):
+        try:
+            obj = Parent.objects.get(name = items[pos])
+        except Parent.DoesNotExist:
+            if pos == 0:
+                obj = Parent.add_root(name = items[pos])
+            else:
+                obj = previous.add_child(name = items[pos])
+        pos = pos + 1          
+        previous = obj
+        
+            
     try:
         parent = Parent.objects.get(name = items[-1])
     except Parent.DoesNotExist:
