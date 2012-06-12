@@ -2,6 +2,10 @@ from django.http import HttpResponse, Http404, HttpResponseServerError
 from models import Parent, KeyValue, get_keys_from_parent, get_keys_from_kv, parent_tree_valid
 import logging
 import simplejson as json
+import yaml
+import re
+from elementtree.SimpleXMLWriter import XMLWriter
+from StringIO import StringIO
 
 logger = logging.getLogger(__name__)
 
@@ -48,13 +52,60 @@ def store(request, object_ref):
         return HttpResponseServerError('Unexpected situation. Neither parents or key-value pairs match last operand')
 
     return make_response(request, kv)    
+
+def yaml_dump(data):
+    """
+    This function is used to properly parse the data, so that we have (non unicode) output
+    """
     
+    # Helper dictionary
+    data2 = {}
+    
+    # First remove all our uniode coding, we reencode to 'ascii'
+    for k, v in data.iteritems():
+        data2[k.encode('ascii', 'ignore')] = v.encode('ascii', 'ignore')
+        
+    return yaml.dump(data2, explicit_start=True, explicit_end=True, 
+                     default_flow_style=False, allow_unicode=False, indent=4 * ' ')
+
+def json_dump(data):
+    """
+    This function is a simple wrapper, so that we have some nice json output
+    """
+    return json.dumps(data, sort_keys=True, indent=4 * ' ')
+
+def xml_dump(data):
+    stream = StringIO()
+    xml = XMLWriter(stream)
+    xml.start("datafields")
+    for k, v in data.iteritems():
+        xml.element("dataelement", name=k, value=v)
+    xml.close("datafields")
+    
+    return_string = stream.getvalue()
+    stream.close()
+    return return_string
+
 def make_response(request, data):
     """
     This function is supposed to create some output based on the requested data.
     So based on the accept-encoding we output: xml, json, yaml etc.
     """
     
-    # some dirty hack we only ouput json at the moment
-    output = json.dumps(data, sort_keys=True, indent=4 * ' ')
+    encoding_request = request.META['HTTP_ACCEPT']
+    yaml_match = re.compile(r'yaml', re.IGNORECASE)
+    json_match = re.compile(r'json', re.IGNORECASE)
+    xml_match = re.compile(r'xml', re.IGNORECASE)
+    
+    output = None
+    
+    if yaml_match.search(encoding_request):
+        output = yaml_dump(data)
+    elif json_match.search(encoding_request):
+        output = json_dump(data)
+    elif xml_match.search(encoding_request):
+        output = xml_dump(data)
+    else:
+        raise Http404
+
     return HttpResponse(output)

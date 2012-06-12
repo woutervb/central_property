@@ -17,11 +17,16 @@ Framework:
  
 parsers:
  simplejson
+ PyYAML
+ elementtree
+ 
  
 Installation of framework, extensions and parsers:
  pip install Django
  pip install django-extensions
  pip install django-treebeard
  pip install simplejson
+ pip install PyYAML
+ pip install elementtree
  
 (pip can be installed using the python setuptools with the command easy_setup install pip)
