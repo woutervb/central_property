@@ -44,6 +44,18 @@ Extending the above example with child3 gives the following options
 Now requesting key0 (or all key's) from child3 will only return the value as specified by this child! So it is possible to set global settings while overriding them locally.
 The webinterface will make this clear (even as comments in the responses, if permitted by the response format)
 
+# Example curl usage
+One easy way to test this, is by using curl. The following example(s) can be used to query the data.
+
+    # Retrieve the response in xml
+    curl -v --header "Accept: application/xml" http://<hostname>/<uri>
+    
+    # Retrieve the response in json
+    curl -v --header "Accept: application/json" http://<hostname>/<uri>
+
+    # Retrieve the response in yaml
+    curl -v --header "Accept: application/yaml" http://<hostname>/<uri>
+
 # License
 The license for the project is currently [GPLv2]. The reason it states currently is that no proper review of available licenses has been done and while there is only one author this gives the possibility for others to comment and join. If more volunteers appear the licensing will be decided.
 
