@@ -26,3 +26,37 @@ class KeyValue(models.Model):
     created = CreationDateTimeField()
     modified = ModificationDateTimeField()
 
+def get_keys_from_parent(items):
+    """
+    This function will return an array with key-value combinations that belong
+    to the parent (indicated by last item) walking the tree backwards, adding
+    any key's at that location.
+    """
+    return_kv = {}
+    
+    for item in reversed(items):
+        parent = Parent.objects.get(name = item)
+        kv_objs = KeyValue.objects.filter(parent_id = parent)
+        
+        for kv in kv_objs:
+            return_kv[kv.key] = kv.value
+            
+    return return_kv
+    
+def get_keys_from_kv(items):
+    """
+    This function wil return a simple key-value pair of the requested item
+    """
+    
+    return_kv = {}
+    
+    parent = Parent.objects.get(name = items[-2])
+    kv_objs = KeyValue.objects.filter(parent_id = parent, key = items[-1])
+
+    for kv in kv_objs:
+        return_kv[kv.key] = kv.value 
+    
+    return return_kv
+    
+def parent_tree_valid(items):
+    return True
