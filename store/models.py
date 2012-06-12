@@ -73,7 +73,7 @@ def parent_tree_valid(items):
         # Get its parent
         item_parent = item.get_parent()
         
-         Is the parent equal to the object 1 location higher in the tree?
+        # Is the parent equal to the object 1 location higher in the tree?
         if (items[count-1] != item_parent.name):
             return False
         
