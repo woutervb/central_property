@@ -56,6 +56,9 @@ One easy way to test this, is by using curl. The following example(s) can be use
     # Retrieve the response in yaml
     curl -v --header "Accept: application/yaml" http://<hostname>/<uri>
 
+    # Place some data in the database
+    curl -v --header "Accept: application/yaml" --header "Content-Type: text/json" --data "{ \"key2\" : \"Content for key2\" }" http://<hostname>/<uri>
+
 # License
 The license for the project is currently [GPLv2]. The reason it states currently is that no proper review of available licenses has been done and while there is only one author this gives the possibility for others to comment and join. If more volunteers appear the licensing will be decided.
 
