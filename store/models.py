@@ -2,6 +2,7 @@ from django.db import models
 from django_extensions.db.fields import ModificationDateTimeField, CreationDateTimeField
 from treebeard.mp_tree import MP_Node
 
+
 # Create your models here.
 class Parent(MP_Node):
     name = models.CharField(max_length=255)
@@ -34,7 +35,9 @@ def get_keys_from_parent(items):
     """
     return_kv = {}
     
-    for item in reversed(items):
+    # By iterating from the lowest level to a higher level we will overwrite any
+    # settings with the same key at a higher level
+    for item in items:
         parent = Parent.objects.get(name = item)
         kv_objs = KeyValue.objects.filter(parent_id = parent)
         
@@ -45,7 +48,7 @@ def get_keys_from_parent(items):
     
 def get_keys_from_kv(items):
     """
-    This function wil return a simple key-value pair of the requested item
+    This function will return a simple key-value pair of the requested item
     """
     
     return_kv = {}
@@ -59,4 +62,23 @@ def get_keys_from_kv(items):
     return return_kv
     
 def parent_tree_valid(items):
+    """
+    This function will check if the tree as specified really exists in the form of Parent object
+    being related to each other.
+    """
+        
+    for count in xrange(len(items) - 1, 0 , -1):
+        # Get the object at count position in the tree
+        item = Parent.objects.get(name = items[count])
+        # Get its parent
+        item_parent = item.get_parent()
+        
+        print item.name
+        print item_parent.name
+        print items[count]
+        print items[count - 1]
+        # Is the parent equal to the object 1 location higher in the tree?
+        if (items[count-1] != item_parent.name):
+            return False
+        
     return True
