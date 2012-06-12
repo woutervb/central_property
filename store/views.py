@@ -33,13 +33,16 @@ def store(request, object_ref):
         except KeyValue.DoesNotExist:
             # Neither a Group or Key does exist with the name
             raise Http404
-    
-    if not parent_tree_valid(items):
-        raise Http404
-    
+       
     if parent_obj:
+        if not parent_tree_valid(items):
+            raise Http404
         kv = get_keys_from_parent(items)
     elif result_set:
+        # Only check the parent part(s), as we will check that the parent really exist
+        # When fetching the real key value combination
+        if not parent_tree_valid(items[:-1]):
+            raise Http404
         kv = get_keys_from_kv(items)
     else:
         return HttpResponseServerError('Unexpected situation. Neither parents or key-value pairs match last operand')
