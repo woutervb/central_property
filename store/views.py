@@ -1,4 +1,5 @@
 from django.http import HttpResponse, Http404, HttpResponseServerError
+from django.template import Context, loader
 from models import Parent, KeyValue, get_keys_from_parent, get_keys_from_kv, parent_tree_valid
 import simplejson as json
 import yaml
@@ -8,7 +9,9 @@ from StringIO import StringIO
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the store.")
+    t = loader.get_template('store/index.html')
+    c = Context()
+    return HttpResponse(t.render(c))
 
 def store(request, object_ref):
     """

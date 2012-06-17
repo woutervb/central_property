@@ -90,7 +90,7 @@ SECRET_KEY = 'pi*o_w@fygpqm6yj!!2n2ds4it%vrtaz7*5!7=wcs8%xy*=xvp'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -112,6 +112,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    
 )
 
 # This variable is introduced as we need to append it for the admin pages of django-treebeard
@@ -141,8 +142,13 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'treebeard',
+    'dajaxice',
+    'dajax',
     'store',
 )
+
+# Settings for dajax & dajaxice
+DAJAXICE_MEDIA_PREFIX='dajaxice'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

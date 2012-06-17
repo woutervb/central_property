@@ -14,6 +14,8 @@ Framework:
  django
  django-extensions
  django-treebeard
+ django-dajax
+ django-dajaxice
  
 parsers:
  simplejson
@@ -28,5 +30,7 @@ Installation of framework, extensions and parsers:
  pip install simplejson
  pip install PyYAML
  pip install elementtree
+ pip install django-dajaxice
+ pip install django-dajax
  
 (pip can be installed using the python setuptools with the command easy_setup install pip)
