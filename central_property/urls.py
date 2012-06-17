@@ -14,6 +14,5 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^store/$', 'store.views.index'),
-    url(r'^store/(?P<object_ref>[\w\/]+)', 'store.views.store'),
+    url(r'^store/', include('store.urls')),
 )
