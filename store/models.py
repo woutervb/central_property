@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, IntegrityError
 from django_extensions.db.fields import ModificationDateTimeField, CreationDateTimeField
 from treebeard.mp_tree import MP_Node
 
@@ -10,6 +10,14 @@ class Parent(MP_Node):
     node_order_by = ['name']
     def __unicode__(self):
         return 'Name: %s' % self.name
+    
+    def save(self, *args, **kwargs):
+        # Override the default save, so that we can ensure that root objects are unique
+        all_roots = self.get_root_nodes()
+        if self in all_roots:
+            raise IntegrityError
+        
+        super(Parent, self).save(*args, **kwargs)
     
     # These lines below are basic modification fields for an audit trail
     created = CreationDateTimeField()
