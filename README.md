@@ -10,6 +10,8 @@ The rest interface will support multiple output formats e.g. Yaml, JSON, XML(?)
 # Framework
 The whole service will be developed using the [Django] framework. This will give the most flexibility as it will handle a lot of webapp related setup. (And Python is a lot of fun ;) )
 
+Key value pairs are found by walking the tree from root via the leafs downwards. Root entries have to be unique. If a request is made to a leaf that does not exist, the items of the last existing leaf will be returned. Request to a key are not supported.
+
 # Example
 If we have an hierarchical store like the example below:
 
@@ -23,7 +25,7 @@ If we have an hierarchical store like the example below:
 * A get call to http://<_hostname_>/root will retrieve **key0 - value0**
 * A get call to http://<_hostname_>/root/child1 will retrieve **key0 - value0** and **key1 - value1**
 * A get call to http://<_hostname_>/root/child2 will retrieve **key0 - value0** and **key2 - value2**
-* A get call to http://<_hostname_>/root/child2/key2 will retrieve **key2 - value2**
+* A get call to http://<_hostname_>/root/child2/child3 will retrieve retrieve **key0 - value0** and **key2 - value2**
 * A get call to http://<_hostname_>/root/key2 will retrieve nothing
 * A get call to http://<_hostname_>/root/key0 will retrieve **key0 - value0**
 

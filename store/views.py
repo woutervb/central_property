@@ -1,5 +1,5 @@
 from django.http import HttpResponse, Http404, HttpResponseServerError
-from models import Parent, KeyValue, get_keys_from_parent, get_keys_from_kv, parent_tree_valid
+from models import Parent, KeyValue, get_keys_from_parent
 import simplejson as json
 import yaml
 import re
@@ -139,32 +139,36 @@ def store_get(request, object_ref):
     # We know that the uri is / divided. The last one is either an
     # Group identifier or an Key
     items = object_ref.split('/')
-    
-    #check if the last item is a key or an object
+
+    # A temporary variable to store the parent object
     parent_obj = None
-    result_set = None
+    result_obj = None
+    for item in items:
+        # Are we at the first item?
+        if item == items[0]:
+            try:
+                # this root object should exist
+                parent_obj = Parent.objects.get(name = item)
+                result_obj = parent_obj
+            except Parent.DoesNotExist:
+                # The parent does not exist
+                raise Http404
+        else:
+            try:
+                objs = Parent.objects.filter(name = item)
+            except Parent.DoesNotExist:
+                result_obj = parent_obj
+                continue
+            
+            for obj in objs:
+                if obj.is_child_of(parent_obj):
+                    parent_obj = obj
+                    result_obj = obj
+                    
     try:
-        parent_obj = Parent.objects.get(name = items[-1])
-    except Parent.DoesNotExist:
-        # If parent does not have the name of the item a key might exist
-        try:
-            result_set = KeyValue.objects.filter(key__exact = items[-1])
-        except KeyValue.DoesNotExist:
-            # Neither a Group or Key does exist with the name
-            raise Http404
-       
-    if parent_obj:
-        if not parent_tree_valid(items):
-            raise Http404
-        kv = get_keys_from_parent(items)
-    elif result_set:
-        # Only check the parent part(s), as we will check that the parent really exist
-        # When fetching the real key value combination
-        if not parent_tree_valid(items[:-1]):
-            raise Http404
-        kv = get_keys_from_kv(items)
-    else:
-        return HttpResponseServerError('Unexpected situation. Neither parents or key-value pairs match last operand')
+        kv = get_keys_from_parent(result_obj)
+    except:
+        return HttpResponseServerError('Unable to retrieve key-value information')
 
     return make_response(request, kv)    
 
