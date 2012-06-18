@@ -1,7 +1,8 @@
 from django.db import models, IntegrityError
+from django.contrib import admin
 from django_extensions.db.fields import ModificationDateTimeField, CreationDateTimeField
 from treebeard.mp_tree import MP_Node
-
+from treebeard.admin import TreeAdmin
 
 # Create your models here.
 class Parent(MP_Node):
@@ -9,12 +10,12 @@ class Parent(MP_Node):
     
     node_order_by = ['name']
     def __unicode__(self):
-        return 'Name: %s' % self.name
+        return '%s' % self.name
     
     def save(self, *args, **kwargs):
         # Override the default save, so that we can ensure that root objects are unique
         all_roots = self.get_root_nodes()
-        if self in all_roots:
+        if (self in all_roots) and (len(all_roots) > 1):
             raise IntegrityError
         
         super(Parent, self).save(*args, **kwargs)
@@ -34,7 +35,20 @@ class KeyValue(models.Model):
     parent_id = models.ManyToManyField(Parent)
     created = CreationDateTimeField()
     modified = ModificationDateTimeField()
+    
+    def __unicode__(self):
+        return self.key + ' -> ' + self.value
+  
+class KeyValueAdmin(admin.ModelAdmin):
+    fields = (('key', 'value'),)
 
+class KeyValueInline(admin.StackedInline):
+    model = KeyValue.parent_id.through
+    extra = 3
+
+class ParentAdmin(TreeAdmin):
+    inlines = [KeyValueInline]
+    
 def get_keys_from_parent(obj):
     """
     This function will return an array with key-value combinations that belong
