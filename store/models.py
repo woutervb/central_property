@@ -38,9 +38,6 @@ class KeyValue(models.Model):
     
     def __unicode__(self):
         return self.key + ' -> ' + self.value
-  
-class KeyValueAdmin(admin.ModelAdmin):
-    fields = (('key', 'value'),)
 
 class KeyValueInline(admin.StackedInline):
     model = KeyValue.parent_id.through
@@ -48,7 +45,11 @@ class KeyValueInline(admin.StackedInline):
 
 class ParentAdmin(TreeAdmin):
     inlines = [KeyValueInline]
-    
+
+class KeyValueAdmin(admin.ModelAdmin):
+    fields = (('key', 'value'),)
+    inlines = [KeyValueInline]
+
 def get_keys_from_parent(obj):
     """
     This function will return an array with key-value combinations that belong
