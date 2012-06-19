@@ -66,7 +66,8 @@ def get_keys_from_parent(obj):
         obj = obj.get_parent()
         
         for kv in kv_objs:
-            return_kv[kv.key] = kv.value
+            if kv.key not in return_kv:
+                return_kv[kv.key] = kv.value
             
     return return_kv
         
