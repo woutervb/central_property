@@ -4,7 +4,6 @@ from models import Parent, KeyValue, get_keys_from_parent, get_keys_from_kv, par
 import simplejson as json
 import yaml
 import re
-from elementtree.SimpleXMLWriter import XMLWriter
 from StringIO import StringIO
 
 
@@ -35,15 +34,12 @@ def store_post(request, object_ref):
     encoded_request = request.META['CONTENT_TYPE']
     yaml_match = re.compile(r'yaml', re.IGNORECASE)
     json_match = re.compile(r'json', re.IGNORECASE)
-    xml_match = re.compile(r'xml', re.IGNORECASE)
   
     data = None
     if yaml_match.search(encoded_request):
         data = yaml_load(body)
     elif json_match.search(encoded_request):
         data = json_load(body)
-    elif xml_match.search(encoded_request):
-        data = xml_load(body)
     else:
         return HttpResponseServerError("Unsupported format specified")
     
@@ -124,13 +120,6 @@ def json_load(data):
     else:
         return None
 
-def xml_load(data):
-    """
-    This function will attempt to decode the given xml input
-    and return a dictionary with key-value pairs
-    """
-    pass
-
 def store_get(request, object_ref):
     """
     This function will check the request that came in.
@@ -198,28 +187,15 @@ def json_dump(data):
     return HttpResponse(json.dumps(data, sort_keys=True, indent=4 * ' '),
                         content_type='text/json')
 
-def xml_dump(data):
-    stream = StringIO()
-    xml = XMLWriter(stream)
-    xml.start("datafields")
-    for k, v in data.iteritems():
-        xml.element("dataelement", name=k, value=v)
-    xml.end("datafields")
-    
-    return_string = stream.getvalue()
-    stream.close()
-    return HttpResponse(return_string, content_type='text/xml')
-
 def make_response(request, data):
     """
     This function is supposed to create some output based on the requested data.
-    So based on the accept-encoding we output: xml, json, yaml etc.
+    So based on the accept-encoding we output: json, yaml etc.
     """
     
     encoding_request = request.META['HTTP_ACCEPT']
     yaml_match = re.compile(r'yaml', re.IGNORECASE)
     json_match = re.compile(r'json', re.IGNORECASE)
-    xml_match = re.compile(r'xml', re.IGNORECASE)
     
     output = None
     
@@ -227,8 +203,6 @@ def make_response(request, data):
         output = yaml_dump(data)
     elif json_match.search(encoding_request):
         output = json_dump(data)
-    elif xml_match.search(encoding_request):
-        output = xml_dump(data)
     else:
         raise Http404
 

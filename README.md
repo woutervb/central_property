@@ -5,7 +5,7 @@ These servers will have some kind of hierarchy, which can be administered in the
 
 The remote servers will obtain acces by using a rest interface. Modifications can be made either via a web interface or via a rest interface.
 
-The rest interface will support multiple output formats e.g. Yaml, JSON, XML(?)
+The rest interface will support multiple output formats e.g. Yaml, JSON
 
 # Framework
 The whole service will be developed using the [Django] framework. This will give the most flexibility as it will handle a lot of webapp related setup. (And Python is a lot of fun ;) )
@@ -52,7 +52,6 @@ One easy way to test this, is by using curl. The following example(s) can be use
     # And retrieve this data
     curl -v --header "Accept: application/json" http://localhost:8000/store/root/child1
     curl -v --header "Accept: application/yaml" http://localhost:8000/store/root/child1
-    curl -v --header "Accept: application/xml" http://localhost:8000/store/root/child1
 
 # License
 The license for the project is currently [GPLv2]. The reason it states currently is that no proper review of available licenses has been done and while there is only one author this gives the possibility for others to comment and join. If more volunteers appear the licensing will be decided.
