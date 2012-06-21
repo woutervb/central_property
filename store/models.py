@@ -1,15 +1,30 @@
-from django.db import models
+from django.db import models, IntegrityError
+from django.contrib import admin
 from django_extensions.db.fields import ModificationDateTimeField, CreationDateTimeField
 from treebeard.mp_tree import MP_Node
-
+from treebeard import admin as treeadmin
 
 # Create your models here.
-class Parent(MP_Node):
+class Tree(MP_Node):
     name = models.CharField(max_length=255)
     
     node_order_by = ['name']
     def __unicode__(self):
-        return 'Name: %s' % self.name
+        return '%s' % self.name
+    
+    def save(self, *args, **kwargs):
+        # Override the default save, so that we can ensure that root objects are unique
+        all_roots = self.get_root_nodes()
+#        if (self in all_roots) and (len(all_roots) > 1):
+        cnt = 0
+        for item in all_roots:
+            if item.name == self.name:
+                cnt = cnt + 1
+        if cnt > 1:
+            raise IntegrityError("Non unique root key")
+        
+        
+        super(Tree, self).save(*args, **kwargs)
     
     # These lines below are basic modification fields for an audit trail
     created = CreationDateTimeField()
@@ -23,58 +38,51 @@ class KeyValue(models.Model):
     """
     key = models.CharField(max_length=255)
     value = models.CharField(max_length=4096)
-    parent_id = models.ManyToManyField(Parent)
+    tree_id = models.ManyToManyField(Tree)
     created = CreationDateTimeField()
     modified = ModificationDateTimeField()
+    
+    def __unicode__(self):
+        return self.key + ' -> ' + self.value
+    
+    def save(self, *args, **kwargs):
+        # Override the default save to ensure that key, value combination is uniq
+        results = KeyValue.objects.filter(key = self.key)
+        for res in results:
+            if res.value == self.value:
+                raise IntegrityError("Non unique key/value combination")
+        super(KeyValue, self).save(*args, **kwargs)
+        
+class KeyValueInline(admin.StackedInline):
+    model = KeyValue.tree_id.through
+    extra = 3
 
-def get_keys_from_parent(items):
+class TreeAdmin(treeadmin.TreeAdmin):
+    inlines = [KeyValueInline]
+
+class KeyValueAdmin(admin.ModelAdmin):
+    fields = (('key', 'value'),)
+    inlines = [KeyValueInline]
+
+def get_keys_from_tree(obj):
     """
     This function will return an array with key-value combinations that belong
-    to the parent (indicated by last item) walking the tree backwards, adding
+    to the tree (indicated by last item) walking the tree backwards, adding
     any key's at that location.
     """
     return_kv = {}
     
     # By iterating from the lowest level to a higher level we will overwrite any
     # settings with the same key at a higher level
-    for item in items:
-        parent = Parent.objects.get(name = item)
-        kv_objs = KeyValue.objects.filter(parent_id = parent)
+    at_root = False
+    while not at_root:
+        at_root = obj.is_root()
+        kv_objs = KeyValue.objects.filter(tree_id = obj)
+        obj = obj.get_parent()
         
         for kv in kv_objs:
-            return_kv[kv.key] = kv.value
+            if kv.key not in return_kv:
+                return_kv[kv.key] = kv.value
             
     return return_kv
-    
-def get_keys_from_kv(items):
-    """
-    This function will return a simple key-value pair of the requested item
-    """
-    
-    return_kv = {}
-    
-    parent = Parent.objects.get(name = items[-2])
-    kv_objs = KeyValue.objects.filter(parent_id = parent, key = items[-1])
-
-    for kv in kv_objs:
-        return_kv[kv.key] = kv.value 
-    
-    return return_kv
-    
-def parent_tree_valid(items):
-    """
-    This function will check if the tree as specified really exists in the form of Parent object
-    being related to each other.
-    """
         
-    for count in xrange(len(items) - 1, 0 , -1):
-        # Get the object at count position in the tree
-        item = Parent.objects.get(name = items[count])
-        # Get its parent
-        item_parent = item.get_parent()
-        
-        # Is the parent equal to the object 1 location higher in the tree?
-        if (items[count-1] != item_parent.name):
-            return False
-        
-    return True

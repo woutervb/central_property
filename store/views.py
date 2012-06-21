@@ -1,16 +1,12 @@
 from django.http import HttpResponse, Http404, HttpResponseServerError
-from django.template import Context, loader
-from models import Parent, KeyValue, get_keys_from_parent, get_keys_from_kv, parent_tree_valid
+
+from models import Tree, KeyValue, get_keys_from_tree
+
 import simplejson as json
 import yaml
 import re
 from StringIO import StringIO
 
-
-def index(request):
-    t = loader.get_template('store/index.html')
-    c = Context()
-    return HttpResponse(t.render(c))
 
 def store(request, object_ref):
     """
@@ -53,18 +49,15 @@ def store_post(request, object_ref):
     # Group identifier or an Key
         
     items = object_ref.split('/')
-    # TODO: build parent properly
-    
-    # BUG: names now have to be unique in order to work, else tree mixup will happen
-    
+        
     pos = 0
     previous = None
     while pos < len(items):
         try:
-            obj = Parent.objects.get(name = items[pos])
-        except Parent.DoesNotExist:
+            obj = Tree.objects.get(name = items[pos])
+        except Tree.DoesNotExist:
             if pos == 0:
-                obj = Parent.add_root(name = items[pos])
+                obj = Tree.add_root(name = items[pos])
             else:
                 obj = previous.add_child(name = items[pos])
         pos = pos + 1          
@@ -72,16 +65,16 @@ def store_post(request, object_ref):
         
             
     try:
-        parent = Parent.objects.get(name = items[-1])
-    except Parent.DoesNotExist:
-        return HttpResponseServerError("Referenced parent could not be found")
+        tree = Tree.objects.get(name = items[-1])
+    except Tree.DoesNotExist:
+        return HttpResponseServerError("Referenced tree could not be found")
     
     
     for k, v in data.iteritems():
         kv_object = None
         new_object = False
         try:
-            kv_object = KeyValue.objects.get(key = k, parent_id = parent)
+            kv_object = KeyValue.objects.get(key = k, tree_id = tree)
         except KeyValue.DoesNotExist:
             kv_object = KeyValue()
             new_object = True
@@ -90,7 +83,7 @@ def store_post(request, object_ref):
         kv_object.value = v
         kv_object.save()
         if new_object:
-            kv_object.parent_id.add(parent)
+            kv_object.tree_id.add(tree)
             kv_object.save()
         
     return make_response(request, { 'result' : 'ok'})
@@ -123,7 +116,7 @@ def json_load(data):
 def store_get(request, object_ref):
     """
     This function will check the request that came in.
-    If the object_ref matches only one of the 'parent' elements, then we will throw the data of
+    If the object_ref matches only one of the 'tree' elements, then we will throw the data of
     all key-value pairs at that level. If a specific key is requested we will only return
     the key-value pair of that item.
     """
@@ -131,32 +124,36 @@ def store_get(request, object_ref):
     # We know that the uri is / divided. The last one is either an
     # Group identifier or an Key
     items = object_ref.split('/')
-    
-    #check if the last item is a key or an object
-    parent_obj = None
-    result_set = None
+
+    # A temporary variable to store the tree object
+    tree_obj = None
+    result_obj = None
+    for item in items:
+        # Are we at the first item?
+        if item == items[0]:
+            try:
+                # this root object should exist
+                tree_obj = Tree.objects.get(name = item)
+                result_obj = tree_obj
+            except Tree.DoesNotExist:
+                # The tree does not exist
+                raise Http404
+        else:
+            try:
+                objs = Tree.objects.filter(name = item)
+            except Tree.DoesNotExist:
+                result_obj = tree_obj
+                continue
+            
+            for obj in objs:
+                if obj.is_child_of(tree_obj):
+                    tree_obj = obj
+                    result_obj = obj
+                    
     try:
-        parent_obj = Parent.objects.get(name = items[-1])
-    except Parent.DoesNotExist:
-        # If parent does not have the name of the item a key might exist
-        try:
-            result_set = KeyValue.objects.filter(key__exact = items[-1])
-        except KeyValue.DoesNotExist:
-            # Neither a Group or Key does exist with the name
-            raise Http404
-       
-    if parent_obj:
-        if not parent_tree_valid(items):
-            raise Http404
-        kv = get_keys_from_parent(items)
-    elif result_set:
-        # Only check the parent part(s), as we will check that the parent really exist
-        # When fetching the real key value combination
-        if not parent_tree_valid(items[:-1]):
-            raise Http404
-        kv = get_keys_from_kv(items)
-    else:
-        return HttpResponseServerError('Unexpected situation. Neither parents or key-value pairs match last operand')
+        kv = get_keys_from_tree(result_obj)
+    except:
+        return HttpResponseServerError('Unable to retrieve key-value information')
 
     return make_response(request, kv)    
 

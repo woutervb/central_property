@@ -16,12 +16,11 @@ Framework:
  django
  django-extensions
  django-treebeard
+ django-grappelli
  
 parsers:
  simplejson
  PyYAML
- 
- 
  
 Installation of framework, extensions and parsers:
  pip install Django
@@ -31,4 +30,3 @@ Installation of framework, extensions and parsers:
  pip install PyYAML
  
 (pip can be installed using the python setuptools with the command easy_setup install pip)
-
