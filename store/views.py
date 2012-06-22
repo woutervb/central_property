@@ -124,6 +124,9 @@ def store_get(request, object_ref):
     # We know that the uri is / divided. The last one is either an
     # Group identifier or an Key
     items = object_ref.split('/')
+    return get_response_from_items(request, items)
+    
+def get_response_from_items(request, items):
 
     # A temporary variable to store the tree object
     tree_obj = None

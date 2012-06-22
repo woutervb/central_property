@@ -53,8 +53,13 @@ One easy way to test this, is by using curl. The following example(s) can be use
     curl -v --header "Accept: application/json" http://localhost:8000/store/root/child1
     curl -v --header "Accept: application/yaml" http://localhost:8000/store/root/child1
 
+# Puppet integration
+One of the reasons to start this project is to have a 'central' location where key-value pairs can be defined which can be used in other project.
+For puppet integration a 'hiera-foreman' compatibel interface has been created. More information about this plugin can be found here: [https://github.com/torrancew/hiera-foreman]
+
 # License
-The license for the project is currently [GPLv2]. The reason it states currently is that no proper review of available licenses has been done and while there is only one author this gives the possibility for others to comment and join. If more volunteers appear the licensing will be decided.
+This project is licensed under [GPLv2].
 
 [Django]: https://www.djangoproject.com 
 [GPLv2]: http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+[https://github.com/torrancew/hiera-foreman]: https://github.com/torrancew/hiera-foreman

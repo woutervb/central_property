@@ -22,8 +22,6 @@ class Tree(MP_Node):
                 cnt = cnt + 1
         if cnt > 1:
             raise IntegrityError("Non unique root key")
-        
-        
         super(Tree, self).save(*args, **kwargs)
     
     # These lines below are basic modification fields for an audit trail
@@ -48,17 +46,25 @@ class KeyValue(models.Model):
     def save(self, *args, **kwargs):
         # Override the default save to ensure that key, value combination is uniq
         results = KeyValue.objects.filter(key = self.key)
+        cnt = 0
         for res in results:
             if res.value == self.value:
-                raise IntegrityError("Non unique key/value combination")
+                cnt = cnt + 1
+        if cnt > 0:        
+            raise IntegrityError("Non unique key/value combination")
         super(KeyValue, self).save(*args, **kwargs)
         
 class KeyValueInline(admin.StackedInline):
     model = KeyValue.tree_id.through
     extra = 3
+    can_delete = False
 
+#class TreeAdmin(treeadmin.TreeAdmin):
 class TreeAdmin(treeadmin.TreeAdmin):
     inlines = [KeyValueInline]
+    search_fields = ('name',)
+    # TODO 
+    # Write proper template iso TreeAdmin default, as it does not work 
 
 class KeyValueAdmin(admin.ModelAdmin):
     fields = (('key', 'value'),)
