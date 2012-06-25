@@ -7,7 +7,11 @@ class KeyValueInline(admin.StackedInline):
     model = KeyValue.parent_id.through
     extra = 3
 
-class ParentAdmin(TreeAdmin):
+#class ParentAdmin(admin.ModelAdmin):
+#    change_list_template = 'admin/tree_change_list.html'
+class ParentAdmin(admin.ModelAdmin):
+    search_fields = ('name', )
+    change_list_template = 'admin/tree_change.html'
     inlines = [KeyValueInline]
 
 class KeyValueAdmin(admin.ModelAdmin):
