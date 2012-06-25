@@ -1,8 +1,6 @@
 from django.db import models, IntegrityError
-from django.contrib import admin
 from django_extensions.db.fields import ModificationDateTimeField, CreationDateTimeField
 from treebeard.mp_tree import MP_Node
-from treebeard.admin import TreeAdmin
 
 # Create your models here.
 class Parent(MP_Node):
@@ -38,17 +36,6 @@ class KeyValue(models.Model):
     
     def __unicode__(self):
         return self.key + ' -> ' + self.value
-
-class KeyValueInline(admin.StackedInline):
-    model = KeyValue.parent_id.through
-    extra = 3
-
-class ParentAdmin(TreeAdmin):
-    inlines = [KeyValueInline]
-
-class KeyValueAdmin(admin.ModelAdmin):
-    fields = (('key', 'value'),)
-    inlines = [KeyValueInline]
 
 def get_keys_from_parent(obj):
     """
