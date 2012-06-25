@@ -1,6 +1,16 @@
 # Django settings for central_property project.
 import os
 
+# Some magic which prevents hardcoding the base_dir for templates in
+# This file to ease development
+base_dir = ''
+try:
+    import inspect
+    base_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
+    print base_dir
+except:
+    pass
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -112,6 +122,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    base_dir + '/templates',
 )
 
 # This variable is introduced as we need to append it for the admin pages of django-treebeard
