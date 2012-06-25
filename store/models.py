@@ -40,15 +40,17 @@ class KeyValue(models.Model):
     
     def __unicode__(self):
         return self.key + ' -> ' + self.value
+    
     def save(self, *args, **kwargs):
         # Override the default save to ensure that key, value combination is uniq
         results = KeyValue.objects.filter(key = self.key)
         cnt = 0
         for res in results:
-            if res.value == self.value:
+            if (res.value == self.value) and (res != self):
                 cnt = cnt + 1
         if cnt > 0:        
             raise IntegrityError("Non unique key/value combination")
+        
         super(KeyValue, self).save(*args, **kwargs)
         
 def get_keys_from_tree(obj):
