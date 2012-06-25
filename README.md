@@ -5,12 +5,10 @@ These servers will have some kind of hierarchy, which can be administered in the
 
 The remote servers will obtain acces by using a rest interface. Modifications can be made either via a web interface or via a rest interface.
 
-The rest interface will support multiple output formats e.g. Yaml, JSON, XML(?)
+The rest interface will support multiple output formats e.g. Yaml, JSON
 
 # Framework
 The whole service will be developed using the [Django] framework. This will give the most flexibility as it will handle a lot of webapp related setup. (And Python is a lot of fun ;) )
-
-Key value pairs are found by walking the tree from root via the leafs downwards. Root entries have to be unique. If a request is made to a leaf that does not exist, the items of the last existing leaf will be returned. Request to a key are not supported.
 
 # Example
 If we have an hierarchical store like the example below:
@@ -25,7 +23,7 @@ If we have an hierarchical store like the example below:
 * A get call to http://<_hostname_>/root will retrieve **key0 - value0**
 * A get call to http://<_hostname_>/root/child1 will retrieve **key0 - value0** and **key1 - value1**
 * A get call to http://<_hostname_>/root/child2 will retrieve **key0 - value0** and **key2 - value2**
-* A get call to http://<_hostname_>/root/child2/child3 will retrieve retrieve **key0 - value0** and **key2 - value2**
+* A get call to http://<_hostname_>/root/child2/key2 will retrieve **key2 - value2**
 * A get call to http://<_hostname_>/root/key2 will retrieve nothing
 * A get call to http://<_hostname_>/root/key0 will retrieve **key0 - value0**
 
@@ -54,10 +52,14 @@ One easy way to test this, is by using curl. The following example(s) can be use
     # And retrieve this data
     curl -v --header "Accept: application/json" http://localhost:8000/store/root/child1
     curl -v --header "Accept: application/yaml" http://localhost:8000/store/root/child1
-    curl -v --header "Accept: application/xml" http://localhost:8000/store/root/child1
+
+# Puppet integration
+One of the reasons to start this project is to have a 'central' location where key-value pairs can be defined which can be used in other project.
+For puppet integration a 'hiera-foreman' compatibel interface has been created. More information about this plugin can be found here: [https://github.com/torrancew/hiera-foreman]
 
 # License
-The license for the project is currently [GPLv2]. The reason it states currently is that no proper review of available licenses has been done and while there is only one author this gives the possibility for others to comment and join. If more volunteers appear the licensing will be decided.
+This project is licensed under [GPLv2].
 
 [Django]: https://www.djangoproject.com 
 [GPLv2]: http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+[https://github.com/torrancew/hiera-foreman]: https://github.com/torrancew/hiera-foreman

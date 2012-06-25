@@ -1,5 +1,7 @@
 This project is developed using the following environment
 
+Be sure to setup TEMPLATE_DIRS to the absolute path of the project
+
 Editor:
  Eclipse + Pydev + Git
 
@@ -14,12 +16,11 @@ Framework:
  django
  django-extensions
  django-treebeard
+ django-grappelli
  
 parsers:
  simplejson
  PyYAML
- elementtree
- 
  
 Installation of framework, extensions and parsers:
  pip install Django
@@ -27,6 +28,5 @@ Installation of framework, extensions and parsers:
  pip install django-treebeard
  pip install simplejson
  pip install PyYAML
- pip install elementtree
  
 (pip can be installed using the python setuptools with the command easy_setup install pip)

@@ -1,14 +1,9 @@
 from django.http import HttpResponse, Http404, HttpResponseServerError
-from models import Parent, KeyValue, get_keys_from_parent
+from models import Tree, KeyValue, get_keys_from_tree
 import simplejson as json
 import yaml
 import re
-from elementtree.SimpleXMLWriter import XMLWriter
-from StringIO import StringIO
 
-
-def index(request):
-    return HttpResponse("Hello, world. You're at the store.")
 
 def store(request, object_ref):
     """
@@ -32,15 +27,12 @@ def store_post(request, object_ref):
     encoded_request = request.META['CONTENT_TYPE']
     yaml_match = re.compile(r'yaml', re.IGNORECASE)
     json_match = re.compile(r'json', re.IGNORECASE)
-    xml_match = re.compile(r'xml', re.IGNORECASE)
   
     data = None
     if yaml_match.search(encoded_request):
         data = yaml_load(body)
     elif json_match.search(encoded_request):
         data = json_load(body)
-    elif xml_match.search(encoded_request):
-        data = xml_load(body)
     else:
         return HttpResponseServerError("Unsupported format specified")
     
@@ -54,18 +46,15 @@ def store_post(request, object_ref):
     # Group identifier or an Key
         
     items = object_ref.split('/')
-    # TODO: build parent properly
-    
-    # BUG: names now have to be unique in order to work, else tree mixup will happen
-    
+        
     pos = 0
     previous = None
     while pos < len(items):
         try:
-            obj = Parent.objects.get(name = items[pos])
-        except Parent.DoesNotExist:
+            obj = Tree.objects.get(name = items[pos])
+        except Tree.DoesNotExist:
             if pos == 0:
-                obj = Parent.add_root(name = items[pos])
+                obj = Tree.add_root(name = items[pos])
             else:
                 obj = previous.add_child(name = items[pos])
         pos = pos + 1          
@@ -73,16 +62,16 @@ def store_post(request, object_ref):
         
             
     try:
-        parent = Parent.objects.get(name = items[-1])
-    except Parent.DoesNotExist:
-        return HttpResponseServerError("Referenced parent could not be found")
+        tree = Tree.objects.get(name = items[-1])
+    except Tree.DoesNotExist:
+        return HttpResponseServerError("Referenced tree could not be found")
     
     
     for k, v in data.iteritems():
         kv_object = None
         new_object = False
         try:
-            kv_object = KeyValue.objects.get(key = k, parent_id = parent)
+            kv_object = KeyValue.objects.get(key = k, tree_id = tree)
         except KeyValue.DoesNotExist:
             kv_object = KeyValue()
             new_object = True
@@ -91,7 +80,7 @@ def store_post(request, object_ref):
         kv_object.value = v
         kv_object.save()
         if new_object:
-            kv_object.parent_id.add(parent)
+            kv_object.tree_id.add(tree)
             kv_object.save()
         
     return make_response(request, { 'result' : 'ok'})
@@ -121,17 +110,10 @@ def json_load(data):
     else:
         return None
 
-def xml_load(data):
-    """
-    This function will attempt to decode the given xml input
-    and return a dictionary with key-value pairs
-    """
-    pass
-
 def store_get(request, object_ref):
     """
     This function will check the request that came in.
-    If the object_ref matches only one of the 'parent' elements, then we will throw the data of
+    If the object_ref matches only one of the 'tree' elements, then we will throw the data of
     all key-value pairs at that level. If a specific key is requested we will only return
     the key-value pair of that item.
     """
@@ -139,34 +121,37 @@ def store_get(request, object_ref):
     # We know that the uri is / divided. The last one is either an
     # Group identifier or an Key
     items = object_ref.split('/')
+    return get_response_from_items(request, items)
+    
+def get_response_from_items(request, items):
 
-    # A temporary variable to store the parent object
-    parent_obj = None
+    # A temporary variable to store the tree object
+    tree_obj = None
     result_obj = None
     for item in items:
         # Are we at the first item?
         if item == items[0]:
             try:
                 # this root object should exist
-                parent_obj = Parent.objects.get(name = item)
-                result_obj = parent_obj
-            except Parent.DoesNotExist:
-                # The parent does not exist
+                tree_obj = Tree.objects.get(name = item)
+                result_obj = tree_obj
+            except Tree.DoesNotExist:
+                # The tree does not exist
                 raise Http404
         else:
             try:
-                objs = Parent.objects.filter(name = item)
-            except Parent.DoesNotExist:
-                result_obj = parent_obj
+                objs = Tree.objects.filter(name = item)
+            except Tree.DoesNotExist:
+                result_obj = tree_obj
                 continue
             
             for obj in objs:
-                if obj.is_child_of(parent_obj):
-                    parent_obj = obj
+                if obj.is_child_of(tree_obj):
+                    tree_obj = obj
                     result_obj = obj
                     
     try:
-        kv = get_keys_from_parent(result_obj)
+        kv = get_keys_from_tree(result_obj)
     except:
         return HttpResponseServerError('Unable to retrieve key-value information')
 
@@ -199,28 +184,15 @@ def json_dump(data):
     return HttpResponse(json.dumps(data, sort_keys=True, indent=4 * ' '),
                         content_type='text/json')
 
-def xml_dump(data):
-    stream = StringIO()
-    xml = XMLWriter(stream)
-    xml.start("datafields")
-    for k, v in data.iteritems():
-        xml.element("dataelement", name=k, value=v)
-    xml.end("datafields")
-    
-    return_string = stream.getvalue()
-    stream.close()
-    return HttpResponse(return_string, content_type='text/xml')
-
 def make_response(request, data):
     """
     This function is supposed to create some output based on the requested data.
-    So based on the accept-encoding we output: xml, json, yaml etc.
+    So based on the accept-encoding we output: json, yaml etc.
     """
     
     encoding_request = request.META['HTTP_ACCEPT']
     yaml_match = re.compile(r'yaml', re.IGNORECASE)
     json_match = re.compile(r'json', re.IGNORECASE)
-    xml_match = re.compile(r'xml', re.IGNORECASE)
     
     output = None
     
@@ -228,8 +200,6 @@ def make_response(request, data):
         output = yaml_dump(data)
     elif json_match.search(encoding_request):
         output = json_dump(data)
-    elif xml_match.search(encoding_request):
-        output = xml_dump(data)
     else:
         raise Http404
 

@@ -1,10 +1,10 @@
-from store.models import KeyValue, Parent
+from store.models import KeyValue, Tree
 from django.contrib import admin
 from treebeard.admin import TreeAdmin
 
 
 class KeyValueInline(admin.StackedInline):
-    model = KeyValue.parent_id.through
+    model = KeyValue.tree_id.through
     extra = 3
 
 #class ParentAdmin(admin.ModelAdmin):
@@ -18,5 +18,5 @@ class KeyValueAdmin(admin.ModelAdmin):
     fields = (('key', 'value'),)
     inlines = [KeyValueInline]
 
-admin.site.register(Parent, ParentAdmin)
+admin.site.register(Tree, TreeAdmin)
 admin.site.register(KeyValue, KeyValueAdmin)

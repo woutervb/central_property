@@ -1,19 +1,14 @@
 from django.conf.urls import patterns, include, url
-
-# Uncomment the next two lines to enable the admin:
+from django.views.generic.simple import redirect_to
+from django.conf import settings
 from django.contrib import admin
+
 admin.autodiscover()
 
+
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'central_property.views.home', name='home'),
-    # url(r'^central_property/', include('central_property.foo.urls')),
-
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
+    url(r'^$', redirect_to, {'url' : '/store'}),
+    url(r'^store/', include('store.urls')),
+    url(r'^fqdn/(?P<object_ref>[\w\.]+)$', 'store.foreman.fqdn'),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^store/$', 'store.views.index'),
-    url(r'^store/(?P<object_ref>[\w\/]+)', 'store.views.store'),
 )
