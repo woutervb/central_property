@@ -9,6 +9,6 @@ admin.autodiscover()
 urlpatterns = patterns('',
     url(r'^$', redirect_to, {'url' : '/store'}),
     url(r'^store/', include('store.urls')),
-    url(r'^fqdn/(?P<object_ref>[\w\.]+)$', 'store.foreman.fqdn'),
+    url(r'^hiera/(?P<object_ref>[\w\.]+)$', 'store.hiera.hiera'),
     url(r'^admin/', include(admin.site.urls)),
 )
