@@ -8,7 +8,6 @@ try:
     import inspect
     base_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
     base_dir = base_dir.replace('\\', '/') + '/..'
-    print base_dir
 except:
     pass
 
