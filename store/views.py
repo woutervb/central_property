@@ -137,7 +137,7 @@ def get_response_from_items(request, items):
                 result_obj = tree_obj
             except Tree.DoesNotExist:
                 # The tree does not exist
-                raise Http404
+                return HttpResponseServerError("The start node '%s' cannot be found" % item)
         else:
             try:
                 objs = Tree.objects.filter(name = item)
@@ -157,7 +157,7 @@ def get_response_from_items(request, items):
 
     return make_response(request, kv)    
 
-def yaml_dump(data):
+def yaml_dump(data, webbrowsermode = False):
     """
     This function is used to properly parse the data, so that we have (non unicode) output
     """
@@ -168,14 +168,20 @@ def yaml_dump(data):
     # First remove all our uniode coding, we reencode to 'ascii'
     for k, v in data.iteritems():
         data2[k.encode('ascii', 'ignore')] = v.encode('ascii', 'ignore')
-        
-    return HttpResponse(yaml.dump(data2, 
+    
+    output = ''
+    if webbrowsermode:
+        output='text/plain'
+    else:
+        output='plain/yaml'
+            
+    return HttpResponse(yaml.dump({'parmeters' : data2}, 
                                   explicit_start=True, 
                                   explicit_end=True, 
                                   default_flow_style=False, 
                                   allow_unicode=False, 
                                   indent=4 * ' '),
-                        content_type='text/yaml')
+                        content_type=output)
 
 def json_dump(data):
     """
@@ -196,11 +202,12 @@ def make_response(request, data):
     
     output = None
     
-    if yaml_match.search(encoding_request):
-        output = yaml_dump(data)
-    elif json_match.search(encoding_request):
+    if json_match.search(encoding_request):
         output = json_dump(data)
+    elif yaml_match.search(encoding_request):
+        output = yaml_dump(data)
     else:
-        raise Http404
+        output = yaml_dump(data, webbrowsermode = True)
+
 
     return output
