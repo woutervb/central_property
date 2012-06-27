@@ -1,4 +1,4 @@
-from django.http import HttpResponse, Http404, HttpResponseServerError
+from django.http import HttpResponse, HttpResponseServerError
 from models import Tree, KeyValue, get_keys_from_tree
 import simplejson as json
 import yaml
@@ -175,7 +175,7 @@ def yaml_dump(data, webbrowsermode = False):
     else:
         output='plain/yaml'
             
-    return HttpResponse(yaml.dump({'parmeters' : data2}, 
+    return HttpResponse(yaml.dump({'parameters' : data2}, 
                                   explicit_start=True, 
                                   explicit_end=True, 
                                   default_flow_style=False, 
