@@ -163,12 +163,13 @@ def yaml_dump(data, webbrowsermode = False):
     """
     
     # Helper dictionary
-    data2 = {}
+    data2 = []
     
     # First remove all our uniode coding, we reencode to 'ascii'
     for k, v in data.iteritems():
-        data2[k.encode('ascii', 'ignore')] = v.encode('ascii', 'ignore')
-    
+        data2.append({k.encode('ascii', 'ignore') : v.encode('ascii', 'ignore')})
+           
+        
     output = ''
     if webbrowsermode:
         output='text/plain'
