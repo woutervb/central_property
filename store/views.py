@@ -163,11 +163,11 @@ def yaml_dump(data, webbrowsermode = False):
     """
     
     # Helper dictionary
-    data2 = []
+    data2 = {}
     
     # First remove all our uniode coding, we reencode to 'ascii'
     for k, v in data.iteritems():
-        data2.append({k.encode('ascii', 'ignore') : v.encode('ascii', 'ignore')})
+        data2[k.encode('ascii', 'ignore')] = v.encode('ascii', 'ignore')
            
         
     output = ''
@@ -178,7 +178,7 @@ def yaml_dump(data, webbrowsermode = False):
             
     return HttpResponse(yaml.dump({'parameters' : data2}, 
                                   explicit_start=True, 
-                                  explicit_end=True, 
+                                  explicit_end=False, 
                                   default_flow_style=False, 
                                   allow_unicode=False, 
                                   indent=4 * ' '),
