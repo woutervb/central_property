@@ -2,8 +2,12 @@ from store.models import KeyValue, Tree
 from django.contrib import admin
 from forms import MoveNodeForm
 
+class KeyValueInline(admin.StackedInline):
+    model = KeyValue.tree_id.through
+    extra = 3
+
 class TreeAdmin(admin.ModelAdmin):
-    "Django Admin class for treebeard"
+    "Django Admin class for treebeard, backported from 2.0rc"
     change_list_template = 'admin/tree_change_list.html'
     form = MoveNodeForm
 
@@ -16,11 +20,9 @@ class TreeAdmin(admin.ModelAdmin):
             return super(TreeAdmin, self).queryset(request)
         else:
             return self.model.get_tree()
-
-class KeyValueInline(admin.StackedInline):
-    model = KeyValue.tree_id.through
-    extra = 3
-
+        
+    inlines = [KeyValueInline]
+    
 class KeyValueAdmin(admin.ModelAdmin):
     fields = (('key', 'value'),)
     inlines = [KeyValueInline]
