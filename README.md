@@ -12,7 +12,7 @@ can be made either via a web interface.
 The rest interface will support multiple output formats e.g. Yaml, json
 
 # Framework
-The whole service will be developed using the [Django] framework. This will 
+The whole service will be developed using the [Django] framework, version 1.4. This will 
 give the most flexibility as it will handle a lot of webapp related setup. 
 (And Python is a lot of fun ;) )
 
