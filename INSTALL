@@ -13,7 +13,7 @@ Database:
  sqlite
  
 Framework:
- django
+ django 1.4
  django-extensions
  django-treebeard
  django-grappelli
