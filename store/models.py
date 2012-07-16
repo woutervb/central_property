@@ -33,8 +33,10 @@ class KeyValue(models.Model):
     The assumption is made that we only with to store data encoded as a character.
     """
     key = models.CharField(max_length=255)
-    value = models.CharField(max_length=4096)
-    tree_id = models.ManyToManyField(Tree)
+    value = models.TextField(max_length=65534)
+    comment = models.CharField(max_length=1024, blank=True)
+    tree_id = models.ManyToManyField(Tree, 
+                verbose_name='trees at which this key-value pair is defined')
     created = CreationDateTimeField()
     modified = ModificationDateTimeField()
     
